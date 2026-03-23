@@ -20,6 +20,13 @@ struct ModelCardView: View {
     private var isCurrent: Bool { whisperState.currentTranscriptionModel?.name == model.name }
     private var isCloud: Bool { model.provider.isCloud }
 
+    private var isUnsupportedOS: Bool {
+        if model.provider == .nativeApple {
+            if #available(macOS 26, *) { return false } else { return true }
+        }
+        return false
+    }
+
     private var isDownloaded: Bool {
         switch model.provider {
         case .local: return whisperState.availableModels.contains { $0.name == model.name }
@@ -75,6 +82,7 @@ struct ModelCardView: View {
                 apiKeySection.padding(.top, 4)
             }
         }
+        .opacity(isUnsupportedOS ? 0.5 : 1.0)
         .listRowBackground(isCurrent ? Color.accentColor.opacity(0.15) : Color.clear)
         .onAppear {
             guard isCloud else { return }
@@ -101,7 +109,11 @@ struct ModelCardView: View {
     }
 
     @ViewBuilder private var statusText: some View {
-        if isCurrent {
+        if isUnsupportedOS {
+            Text("Requires macOS 26").font(.caption).foregroundStyle(.secondary)
+        } else if isCurrent && needsDownload {
+            Text("Default — Not Downloaded").font(.caption).foregroundStyle(.orange)
+        } else if isCurrent {
             Text("Default").font(.caption).fontWeight(.semibold).foregroundColor(.accentColor)
         } else if isCloud {
             Text(isConfiguredState ? "Configured" : "Setup Required")
@@ -123,10 +135,19 @@ struct ModelCardView: View {
 
     // MARK: - Action Buttons
 
+    private var needsDownload: Bool {
+        !isCloud && !isDownloaded && (model.provider == .local || model.provider == .parakeet)
+    }
+
     private var actionButtons: some View {
         HStack(spacing: 8) {
-            if isCurrent {
+            if isUnsupportedOS {
+                Text("Not Available").font(.caption).foregroundStyle(.secondary)
+            } else if isCurrent && !needsDownload {
                 Text("Default Model").font(.caption).foregroundStyle(.secondary)
+            } else if isCurrent && needsDownload {
+                Button(isDownloading ? "Downloading..." : "Download") { downloadAction?() }
+                    .buttonStyle(.borderedProminent).controlSize(.small).disabled(isDownloading)
             } else if isWarming {
                 HStack(spacing: 6) { ProgressView().controlSize(.small); Text("Optimizing...").font(.caption).foregroundStyle(.secondary) }
             } else if isDownloaded || (isCloud && isConfiguredState) {
