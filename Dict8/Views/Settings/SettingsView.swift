@@ -221,7 +221,7 @@ struct PowerModeSection: View {
     var body: some View {
         Section {
             ExpandableSettingsRow(isExpanded: $isExpanded, isEnabled: toggleBinding, label: "Power Mode",
-                infoMessage: "Apply custom settings based on active app or website.", infoURL: "https://github.com/pde-rent/dict8 {
+                infoMessage: "Apply custom settings based on active app or website.", infoURL: "https://github.com/pde-rent/dict8") {
                 Toggle(isOn: $powerModeAutoRestoreEnabled) {
                     HStack(spacing: 4) {
                         Text("Auto-Restore Preferences")

@@ -132,7 +132,7 @@ struct PermissionsSectionsView: View {
             HStack(spacing: 4) {
                 Text("Screen Recording Access")
                 InfoTip("Dict8 captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
-                       learnMoreURL: "https://github.com/pde-rent/dict8
+                       learnMoreURL: "https://github.com/pde-rent/dict8")
             }
         }
     }

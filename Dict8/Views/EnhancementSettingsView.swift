@@ -44,11 +44,11 @@ struct EnhancementSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Enhancement") {
+            Section("Transform") {
                 Toggle(isOn: $enhancementService.isEnhancementEnabled) {
                     HStack(spacing: 4) {
-                        Text("Enable Enhancement")
-                        InfoTip("AI enhancement passes transcriptions through LLMs for cleanup and formatting.")
+                        Text("Enable Transform")
+                        InfoTip("Transform passes transcriptions through LLMs for cleanup, formatting, translation, and more.")
                     }
                 }
             }

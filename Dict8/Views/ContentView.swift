@@ -6,32 +6,41 @@ struct ContentView: View {
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @State private var selectedTab = 0
+    @State private var showSettings = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
             ModelManagementView(whisperState: whisperState)
-                .tabItem { Label("Speech to Text", systemImage: "waveform") }
+                .tabItem { Label("Dictate", systemImage: "waveform") }
                 .tag(0)
 
             EnhancementSettingsView()
-                .tabItem { Label("Enhancement", systemImage: "wand.and.stars") }
+                .tabItem { Label("Transform", systemImage: "wand.and.stars") }
                 .tag(1)
 
             TranscriptionHistoryView()
                 .tabItem { Label("History", systemImage: "clock") }
                 .tag(2)
-
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button { showSettings.toggle() } label: {
+                    Image(systemName: "gearshape")
+                }
+                .help("Settings")
+            }
+        }
+        .sheet(isPresented: $showSettings) {
             SettingsView()
                 .environmentObject(whisperState)
-                .tabItem { Label("Settings", systemImage: "gearshape") }
-                .tag(3)
+                .frame(minWidth: 600, minHeight: 500)
         }
         .frame(minWidth: 700, minHeight: 600)
         .applyGlassToolbar()
         .onReceive(NotificationCenter.default.publisher(for: .navigateToDestination)) { notification in
             if let destination = notification.userInfo?["destination"] as? String {
                 switch destination {
-                case "Settings": selectedTab = 3
+                case "Settings": showSettings = true
                 case "AI Models", "Speech to Text": selectedTab = 0
                 case "Enhancement": selectedTab = 1
                 case "History": selectedTab = 2
