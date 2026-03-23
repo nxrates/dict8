@@ -78,6 +78,65 @@ Your normal `make all` / `make build` commands are completely unaffected.
 
 ---
 
+## Creating a DMG Installer
+
+To build a DMG for distribution to colleagues:
+
+```bash
+# Apple Silicon only (Parakeet engine, faster build)
+make dmg-no-whisper
+
+# Universal (Intel + Apple Silicon, requires whisper.cpp)
+make dmg
+```
+
+The DMG is output to `build/release/Dict8-<version>-arm64.dmg` (or `-universal.dmg`).
+
+### Uploading a New Release to GitLab
+
+After building the DMG, upload it to the company GitLab (`git.volcanly.me/du-v2/dict8`):
+
+```bash
+# Set your GitLab token (should already be in your .zshrc as GITLAB_TOKEN)
+export GITLAB_TOKEN="your-token"
+
+# 1. Upload the DMG to the Package Registry
+VERSION="1.70"  # update to match the new version
+curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  --upload-file "build/release/Dict8-${VERSION}-arm64.dmg" \
+  "https://git.volcanly.me/api/v4/projects/du-v2%2Fdict8/packages/generic/dict8/${VERSION}/Dict8-${VERSION}-arm64.dmg"
+
+# 2. Create a release (optional, for a clean release page)
+curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  --header "Content-Type: application/json" \
+  --request POST \
+  --data "{
+    \"tag_name\": \"v${VERSION}\",
+    \"name\": \"Dict8 v${VERSION}\",
+    \"ref\": \"main\",
+    \"description\": \"## Dict8 v${VERSION}\n\nDownload the DMG below and drag Dict8 to Applications.\n\nFirst launch: right-click the app → Open.\",
+    \"assets\": {
+      \"links\": [{
+        \"name\": \"Dict8-${VERSION}-arm64.dmg\",
+        \"url\": \"https://git.volcanly.me/api/v4/projects/du-v2%2Fdict8/packages/generic/dict8/${VERSION}/Dict8-${VERSION}-arm64.dmg\",
+        \"link_type\": \"package\"
+      }]
+    }
+  }" \
+  "https://git.volcanly.me/api/v4/projects/du-v2%2Fdict8/releases"
+```
+
+The download link for colleagues:
+```
+https://git.volcanly.me/du-v2/dict8/-/releases
+```
+
+### First Launch (Ad-hoc Signed Apps)
+
+Since we don't have an Apple Developer ID, the app is ad-hoc signed. Recipients must **right-click → Open** on first launch to bypass Gatekeeper. After that, it opens normally.
+
+---
+
 ## Manual Build Process (Alternative)
 
 If you prefer to build manually or need more control over the build process, follow these steps:

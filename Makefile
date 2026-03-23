@@ -3,7 +3,7 @@ DEPS_DIR := $(HOME)/Dict8-Dependencies
 WHISPER_CPP_DIR := $(DEPS_DIR)/whisper.cpp
 FRAMEWORK_PATH := $(WHISPER_CPP_DIR)/build-apple/whisper.xcframework
 
-.PHONY: all clean whisper setup build build-no-whisper local check healthcheck help dev run
+.PHONY: all clean whisper setup build build-no-whisper local check healthcheck help dev run dmg dmg-no-whisper
 
 # Default target
 all: check build
@@ -102,10 +102,19 @@ run:
 		fi; \
 	fi
 
+# Create DMG installer (universal: Intel + Apple Silicon)
+dmg: check
+	@./scripts/create-dmg.sh
+
+# Create DMG installer (Parakeet-only, arm64)
+dmg-no-whisper: check
+	@./scripts/create-dmg.sh --no-whisper
+
 # Cleanup
 clean:
 	@echo "Cleaning build artifacts..."
 	@rm -rf $(DEPS_DIR)
+	@rm -rf build/
 	@echo "Clean complete"
 
 # Help
@@ -118,6 +127,8 @@ help:
 	@echo "  local              Build for local use (no Apple Developer certificate needed)"
 	@echo "  run                Launch the built Dict8 app"
 	@echo "  dev                Build and run the app (for development)"
+	@echo "  dmg                Create DMG installer (universal: Intel + Apple Silicon)"
+	@echo "  dmg-no-whisper     Create DMG installer (Parakeet-only, arm64)"
 	@echo "  all                Run full build process (default)"
 	@echo "  clean              Remove build artifacts"
 	@echo "  help               Show this help message"
