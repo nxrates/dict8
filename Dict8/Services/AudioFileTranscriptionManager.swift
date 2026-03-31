@@ -43,7 +43,6 @@ class AudioTranscriptionManager: ObservableObject {
             do {
                 guard let currentModel = whisperState.currentTranscriptionModel else { throw TranscriptionError.noModelSelected }
                 let serviceRegistry = TranscriptionServiceRegistry(whisperState: whisperState, modelsDirectory: whisperState.modelsDirectory)
-                defer { serviceRegistry.cleanup() }
 
                 processingPhase = .processingAudio
                 let samples = try await audioProcessor.processAudioToSamples(url)
@@ -78,6 +77,7 @@ class AudioTranscriptionManager: ObservableObject {
 
                 processingPhase = .completed
                 try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await serviceRegistry.cleanup()
                 finishProcessing()
             } catch {
                 handleError(error)

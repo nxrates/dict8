@@ -9,7 +9,7 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
 
     private let logger = Logger(subsystem: "com.prakashjoshipax.dict8", category: "ParakeetStreaming")
     private let parakeetService: ParakeetTranscriptionService
-    private var streamingManager: StreamingAsrManager?
+    private var streamingManager: (any StreamingAsrManager)?
     private var eventsContinuation: AsyncStream<StreamingTranscriptionEvent>.Continuation?
 
     private(set) var transcriptionEvents: AsyncStream<StreamingTranscriptionEvent>
@@ -26,13 +26,18 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
     }
 
     func connect(model: any TranscriptionModel, language: String?) async throws {
-        let version: AsrModelVersion = model.name.lowercased().contains("v2") ? .v2 : .v3
-        let models = try await parakeetService.getOrLoadModels(for: version)
+        // Use EOU 160ms variant for streaming (the main streaming engine)
+        let manager = StreamingModelVariant.parakeetEou160ms.createManager()
 
-        let manager = StreamingAsrManager(config: .streaming)
-        try await manager.start(models: models)
+        // Load models (downloads if needed, then loads into memory)
+        try await manager.loadModels()
+
+        // Set up partial transcript callback after loading models
+        await manager.setPartialTranscriptCallback { [weak self] partialText in
+            self?.eventsContinuation?.yield(.partial(text: partialText))
+        }
+
         self.streamingManager = manager
-
         eventsContinuation?.yield(.sessionStarted)
         logger.notice("Parakeet streaming started for \(model.displayName, privacy: .public)")
     }
@@ -43,7 +48,10 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
         }
 
         let buffer = Self.convertToAudioBuffer(data)
-        await manager.streamAudio(buffer)
+        try await manager.appendAudio(buffer)
+
+        // Process buffered audio to get results
+        try await manager.processBufferedAudio()
     }
 
     func commit() async throws {
@@ -57,7 +65,7 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
 
     func disconnect() async {
         if let manager = streamingManager {
-            await manager.cancel()
+            try? await manager.reset()
         }
         streamingManager = nil
 

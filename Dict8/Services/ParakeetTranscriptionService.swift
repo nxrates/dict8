@@ -22,7 +22,7 @@ class ParakeetTranscriptionService: TranscriptionService {
         }
 
         // Clean up existing manager but preserve cachedModels for reuse
-        asrManager?.cleanup()
+        await asrManager?.cleanup()
         asrManager = nil
         vadManager = nil
         activeVersion = nil
@@ -30,7 +30,7 @@ class ParakeetTranscriptionService: TranscriptionService {
         let models = try await getOrLoadModels(for: version)
 
         let manager = AsrManager(config: .default)
-        try await manager.initialize(models: models)
+        try await manager.loadModels(models)
         self.asrManager = manager
         self.activeVersion = version
     }
@@ -144,8 +144,8 @@ class ParakeetTranscriptionService: TranscriptionService {
     }
 
     // Releases ASR/VAD resources but preserves cached models for reuse
-    func cleanup() {
-        asrManager?.cleanup()
+    func cleanup() async {
+        await asrManager?.cleanup()
         asrManager = nil
         vadManager = nil
         activeVersion = nil
