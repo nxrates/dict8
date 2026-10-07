@@ -22,7 +22,7 @@ if [[ "$ARCH" != "arm64" ]]; then
     fi
 fi
 
-echo "✓ Architecture: Native ARM64 ($ARCH)"
+echo "✓ Architecture: Native ($ARCH)"
 echo ""
 
 # Check for xcodebuild
@@ -36,9 +36,9 @@ fi
 echo "✓ Xcode found"
 echo ""
 echo "Building Dict8..."
-echo "  - Target: macOS (native ARM64)"
+echo "  - Target: macOS (native $ARCH)"
 echo "  - Default Model: Parakeet Redux"
-echo "  - No Rosetta: 100% native"
+echo "  - No Rosetta: 100% native ($ARCH)"
 echo ""
 
 # Build for native ARM64 only - no Rosetta, no universal binaries
@@ -46,8 +46,7 @@ xcodebuild \
     -project Dict8.xcodeproj \
     -scheme Dict8 \
     -configuration Debug \
-    -destination 'platform=macOS,arch=arm64' \
-    -arch arm64 \
+    -destination "platform=macOS,arch=$ARCH" \
     ONLY_ACTIVE_ARCH=YES \
     CODE_SIGN_IDENTITY="-" \
     CODE_SIGNING_REQUIRED=NO \

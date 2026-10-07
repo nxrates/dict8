@@ -113,6 +113,7 @@ struct ProcessingIndicator: View {
 struct RecorderStatusDisplay: View {
     let currentState: RecordingState
     let audioMeter: AudioMeter
+    var liveTranscript: String = ""
     var menuBarHeight: CGFloat? = nil
     @ObservedObject var notificationManager: NotificationManager = .shared
 
@@ -139,6 +140,8 @@ struct RecorderStatusDisplay: View {
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.white)
+                        .lineLimit(2)
+                        .truncationMode(.head)
                 }
             }
             .padding(.top, 12)
@@ -158,7 +161,9 @@ struct RecorderStatusDisplay: View {
 
     private var captionText: String? {
         switch currentState {
-        case .recording: return "Recording"
+        case .recording:
+            let draft = liveTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+            return draft.isEmpty ? "Recording" : draft
         case .transcribing: return "Transcribing"
         case .enhancing: return "Enhancing"
         default: return nil

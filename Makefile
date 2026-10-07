@@ -47,8 +47,7 @@ build: setup
 build-no-whisper: check
 	@echo "Building Dict8 (Parakeet-only, no whisper.cpp)..."
 	xcodebuild -project Dict8.xcodeproj -scheme Dict8 -configuration Debug \
-		-destination 'platform=macOS,arch=arm64' \
-		-arch arm64 \
+		-destination 'platform=macOS,arch=$(shell uname -m)' \
 		ONLY_ACTIVE_ARCH=YES \
 		CODE_SIGN_IDENTITY="-" \
 		CODE_SIGNING_REQUIRED=NO \
