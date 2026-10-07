@@ -37,7 +37,7 @@ echo "✓ Xcode found"
 echo ""
 echo "Building Dict8..."
 echo "  - Target: macOS (native ARM64)"
-echo "  - Default Model: Parakeet V3"
+echo "  - Default Model: Parakeet Redux"
 echo "  - No Rosetta: 100% native"
 echo ""
 
@@ -65,7 +65,7 @@ if [ $BUILD_RESULT -eq 0 ]; then
     echo ""
     echo "Or drag the app to your Applications folder"
     echo ""
-    echo "📌 Default: Parakeet V3 (multilingual)"
+    echo "📌 Default: Parakeet Redux (multilingual, ~220 MB)"
     echo "📌 Download models in app: Settings → AI Models"
 else
     echo "❌ BUILD FAILED"

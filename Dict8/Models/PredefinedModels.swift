@@ -45,10 +45,11 @@ enum PredefinedModels {
 
     // swiftlint:disable function_body_length
     private static let predefinedModels: [any TranscriptionModel] = [
+        PredefinedModel(name: "parakeet-redux", displayName: "Parakeet Redux", description: "Moondream's ternary Parakeet Redux: 7x smaller download (~220 MB), faster on CPU, same 25 European languages", provider: .parakeet, size: "220 MB", speed: 0.99, accuracy: 0.93, ramUsage: 0.4),
         PredefinedModel(name: "parakeet-tdt-0.6b-v3", displayName: "Parakeet V3", description: "NVIDIA's Parakeet V3 with multilingual support across English and 25 European languages", provider: .parakeet, size: "494 MB", speed: 0.99, accuracy: 0.94, ramUsage: 0.8),
         PredefinedModel(name: "parakeet-tdt-0.6b-v2", displayName: "Parakeet V2", description: "NVIDIA's Parakeet V2 optimized for lightning-fast English-only transcription", provider: .parakeet, size: "474 MB", speed: 0.99, accuracy: 0.94, ramUsage: 0.8, isMultilingual: false),
 
-        PredefinedModel(name: "apple-speech", displayName: "Apple Speech", description: "Native Apple Speech framework. Requires macOS 26", provider: .nativeApple),
+        PredefinedModel(name: "apple-speech", displayName: "Apple Speech", description: "Built-in SpeechAnalyzer. Live drafts while you speak, no download. Requires macOS 26", provider: .nativeApple),
 
         PredefinedModel(name: "ggml-tiny",    displayName: "Tiny",             description: "Tiny model, fastest, least accurate",                       provider: .local, size: "75 MB",  speed: 0.95, accuracy: 0.6,  ramUsage: 0.3),
         PredefinedModel(name: "ggml-tiny.en", displayName: "Tiny (English)",   description: "Tiny model optimized for English",                          provider: .local, size: "75 MB",  speed: 0.95, accuracy: 0.65, ramUsage: 0.3, isMultilingual: false),

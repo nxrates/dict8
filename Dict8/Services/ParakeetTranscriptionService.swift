@@ -13,7 +13,7 @@ class ParakeetTranscriptionService: TranscriptionService {
     private let logger = Logger(subsystem: "com.prakashjoshipax.dict8.parakeet", category: "ParakeetTranscriptionService")
 
     private func version(for model: any TranscriptionModel) -> AsrModelVersion {
-        model.name.lowercased().contains("v2") ? .v2 : .v3
+        model.name.lowercased().contains("redux") ? .redux : (model.name.lowercased().contains("v2") ? .v2 : .v3)
     }
 
     private func ensureModelsLoaded(for version: AsrModelVersion) async throws {
@@ -118,7 +118,8 @@ class ParakeetTranscriptionService: TranscriptionService {
             speechAudio += [Float](repeating: 0, count: trailingSilenceSamples)
         }
 
-        let result = try await asrManager.transcribe(speechAudio)
+        var decoderState = TdtDecoderState.make()
+        let result = try await asrManager.transcribe(speechAudio, decoderState: &decoderState)
 
         return result.text
     }

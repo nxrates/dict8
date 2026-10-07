@@ -8,7 +8,7 @@ extension WhisperState {
     }
 
     private func parakeetVersion(for modelName: String) -> AsrModelVersion {
-        modelName.lowercased().contains("v2") ? .v2 : .v3
+        modelName.lowercased().contains("redux") ? .redux : (modelName.lowercased().contains("v2") ? .v2 : .v3)
     }
 
     private func parakeetCacheDirectory(for version: AsrModelVersion) -> URL {
