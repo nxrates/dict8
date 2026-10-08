@@ -78,7 +78,8 @@ class CursorPaster {
     // Paste via CGEvent, temporarily switching to a QWERTY input source so virtual key 0x09 maps to "V".
     private static func pasteFromClipboard() {
         guard AXIsProcessTrusted() else {
-            logger.error("Accessibility not trusted — cannot paste")
+            logger.error("Accessibility not trusted — falling back to AppleScript paste")
+            pasteUsingAppleScript()
             return
         }
 
