@@ -174,6 +174,10 @@ class StreamingTranscriptionService {
             return MistralStreamingProvider()
         case .soniox:
             return SonioxStreamingProvider(modelContext: modelContext)
+        case .parakeet:
+            return ParakeetStreamingProvider()
+        case .nativeApple:
+            return NativeAppleStreamingProvider()
         default:
             fatalError("Unsupported streaming provider: \(model.provider). Check supportsStreaming() before calling startStreaming().")
         }

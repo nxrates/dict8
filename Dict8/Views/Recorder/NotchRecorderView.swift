@@ -26,7 +26,12 @@ struct NotchRecorderView: View {
                     HStack(spacing: 0) {
                         Spacer()
                         Rectangle().fill(Color.clear).frame(width: exactNotchWidth).contentShape(Rectangle())
-                        RecorderStatusDisplay(currentState: whisperState.recordingState, audioMeter: recorder.audioMeter, menuBarHeight: menuBarHeight)
+                        RecorderStatusDisplay(
+                            currentState: whisperState.recordingState,
+                            audioMeter: recorder.audioMeter,
+                            liveTranscript: whisperState.partialTranscript,
+                            menuBarHeight: menuBarHeight
+                        )
                             .padding(.trailing, 16)
                         Spacer()
                     }

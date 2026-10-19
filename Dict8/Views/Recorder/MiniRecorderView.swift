@@ -54,7 +54,11 @@ struct MiniRecorderView: View {
 
     var body: some View {
         if windowManager.isVisible {
-            RecorderStatusDisplay(currentState: whisperState.recordingState, audioMeter: recorder.audioMeter)
+            RecorderStatusDisplay(
+                currentState: whisperState.recordingState,
+                audioMeter: recorder.audioMeter,
+                liveTranscript: whisperState.partialTranscript
+            )
                 .padding(.horizontal, 0)
                 .frame(width: 360, height: 90)
                 .modifier(GlassModifier())

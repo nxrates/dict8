@@ -3,19 +3,41 @@ import FluidAudio
 import Foundation
 import os
 
-/// On-device streaming transcription provider using FluidAudio's StreamingAsrManager
-/// with Parakeet TDT models (v2/v3).
+/// Cached Parakeet EOU 120M streaming engine. Load once, reset between sessions.
+actor ParakeetStreamingEngine {
+    static let shared = ParakeetStreamingEngine()
+
+    private var loadTask: Task<any StreamingAsrManager, any Error>?
+
+    func load() async throws -> any StreamingAsrManager {
+        if let loadTask {
+            return try await loadTask.value
+        }
+        let task = Task { () throws -> any StreamingAsrManager in
+            let created = StreamingModelVariant.parakeetEou160ms.createManager()
+            try await created.loadModels()
+            return created
+        }
+        loadTask = task
+        do {
+            return try await task.value
+        } catch {
+            loadTask = nil
+            throw error
+        }
+    }
+}
+
+/// On-device streaming transcription using FluidAudio Parakeet EOU 120M (160ms chunks).
 final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
 
     private let logger = Logger(subsystem: "com.prakashjoshipax.dict8", category: "ParakeetStreaming")
-    private let parakeetService: ParakeetTranscriptionService
     private var streamingManager: (any StreamingAsrManager)?
     private var eventsContinuation: AsyncStream<StreamingTranscriptionEvent>.Continuation?
 
     private(set) var transcriptionEvents: AsyncStream<StreamingTranscriptionEvent>
 
-    init(parakeetService: ParakeetTranscriptionService) {
-        self.parakeetService = parakeetService
+    init() {
         var continuation: AsyncStream<StreamingTranscriptionEvent>.Continuation!
         transcriptionEvents = AsyncStream { continuation = $0 }
         eventsContinuation = continuation
@@ -26,20 +48,16 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
     }
 
     func connect(model: any TranscriptionModel, language: String?) async throws {
-        // Use EOU 160ms variant for streaming (the main streaming engine)
-        let manager = StreamingModelVariant.parakeetEou160ms.createManager()
+        let manager = try await ParakeetStreamingEngine.shared.load()
+        try await manager.reset()
 
-        // Load models (downloads if needed, then loads into memory)
-        try await manager.loadModels()
-
-        // Set up partial transcript callback after loading models
         await manager.setPartialTranscriptCallback { [weak self] partialText in
             self?.eventsContinuation?.yield(.partial(text: partialText))
         }
 
         self.streamingManager = manager
         eventsContinuation?.yield(.sessionStarted)
-        logger.notice("Parakeet streaming started for \(model.displayName, privacy: .public)")
+        logger.notice("Parakeet EOU streaming started for \(model.displayName, privacy: .public)")
     }
 
     func sendAudioChunk(_ data: Data) async throws {
@@ -49,8 +67,6 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
 
         let buffer = Self.convertToAudioBuffer(data)
         try await manager.appendAudio(buffer)
-
-        // Process buffered audio to get results
         try await manager.processBufferedAudio()
     }
 
@@ -68,12 +84,9 @@ final class ParakeetStreamingProvider: StreamingTranscriptionProvider {
             try? await manager.reset()
         }
         streamingManager = nil
-
         eventsContinuation?.finish()
         logger.notice("Parakeet streaming disconnected")
     }
-
-    // MARK: - Private
 
     /// Converts raw PCM Int16 16kHz mono Data to a Float32 AVAudioPCMBuffer
     /// that FluidAudio's AudioConverter can process.

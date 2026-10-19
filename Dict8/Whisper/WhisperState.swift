@@ -72,7 +72,7 @@ class WhisperState: NSObject, ObservableObject {
     @Published var clipboardMessage = ""
     @Published var miniRecorderError: String?
     @Published var shouldCancelRecording = false
-    var partialTranscript: String = ""
+    @Published var partialTranscript: String = ""
     var currentSession: TranscriptionSession?
 
 

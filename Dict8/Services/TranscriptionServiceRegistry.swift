@@ -89,6 +89,11 @@ class TranscriptionServiceRegistry {
             return model.name == "voxtral-mini-transcribe-realtime-2602"
         case .soniox:
             return model.name == "stt-rt-v4"
+        case .parakeet:
+            return true
+        case .nativeApple:
+            if #available(macOS 26, *) { return true }
+            return false
         default:
             return false
         }
