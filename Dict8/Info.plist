@@ -14,6 +14,8 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Dict8 needs access to your microphone to record audio for transcription.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Dict8 uses on-device Apple Speech to transcribe dictation without sending audio to a server.</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Dict8 needs to interact with your browser to detect the current website for applying website-specific configurations.</string>
 	<key>NSScreenCaptureUsageDescription</key>
